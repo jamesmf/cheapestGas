@@ -15,7 +15,7 @@ public class Station implements Comparable<Station>{
 	
 	
 	public String toString(){
-		return "ind: "+index+" dist from prev: "+distance+ "; cost: "+cost+"; total dist: "+distanceFromZero+'\n';
+		return "ind: "+index+"; dist from prev: "+distance+ "; cost: "+cost+"; total dist: "+distanceFromZero+'\n';
 	}
 
 
