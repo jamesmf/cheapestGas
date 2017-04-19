@@ -111,14 +111,14 @@ public class CheapestGas {
 			System.out.println(breakPoints);
 			
 			//now we can 'paste together' solutions from breakpoint to breakpoint to attain the global optimum
-			breakPoints.add(n);
+			breakPoints.add(n-1);
 			breakPoints.remove(0);
 			int j = 0;
 			int k = 0;
 			int counter = 0;
 			double totalCost = 0;
 			
-			while (k < n){
+			while (k < n-1){
 				k = breakPoints.get(counter);
 				System.out.println("outside: "+j+" "+k);
 				driveToNext(j,k,data,next,totalCost,U);
