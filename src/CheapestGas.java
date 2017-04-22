@@ -28,9 +28,10 @@ public class CheapestGas {
 	
 	
 	public static void main(String args[]) throws IOException{
-		int[] Ns = {5000000,7500000,10000000,12500000,15000000};//,
+		int n = Integer.parseInt(args[0].trim());
+		//int[] Ns = {25000000,27500000,300000000,325000000};//,
 				//12500000,15000000,20000000}; //number of stations
-		int numberOfIterations = 15; //in order to lower variance, we will run each n multiple times and take the mean
+		//int numberOfIterations = 5; //in order to lower variance, we will run each n multiple times and take the mean
 		int U = 100; //size of the tank -- can vary
 		
 		FileWriter writer = new FileWriter("output.csv");
@@ -122,16 +123,16 @@ public class CheapestGas {
 				int[] jk = {0,0};
 				int counter = 0;
 				double totalCost = 0;
-				
+				int[] moves = {0};
 				while (jk[1] < n-1){
 					jk[1] = breakPoints.get(counter);
 	//				System.out.println(jk[0]+" "+jk[1]);
-					totalCost = driveToNext(jk,data,next,totalCost,U);
+					totalCost = driveToNext(jk,data,next,totalCost,U,moves);
 					counter++;
 				}
 	//			System.out.println(totalCost);
 				double time = System.currentTimeMillis() - t1;
-				System.out.println(String.valueOf(n)+','+n*Math.log(n)+','+time);
+				System.out.println(String.valueOf(n)+','+n*Math.log(n)+','+time+"; "+moves[0]);
 				totalTime += time;
 			}
 		writer.write(String.valueOf(n)+','+(totalTime/numberOfIterations)+','+n*Math.log(n)+'\n');
@@ -140,7 +141,7 @@ public class CheapestGas {
 	}
 
 
-	private static double driveToNext(int[] jk, ArrayList<Station> data, ArrayList<Station> next, double totalCost, int U) {
+	private static double driveToNext(int[] jk, ArrayList<Station> data, ArrayList<Station> next, double totalCost, int U,int[] moves) {
 		//this implements the locally optimal solution that, when used only from point i to a breakpoint k, achieves global optimization
 		DecimalFormat df = new DecimalFormat("#.000"); 
 		int j = jk[0];
@@ -157,7 +158,7 @@ public class CheapestGas {
 //				System.out.println("drove from "+stationJ.index+", a distance of "+df.format(diff)+", to "+upNext.index+"; cost "+df.format(stationJ.cost)+"*"+df.format(diff)+'='+df.format(stationJ.cost*diff));
 				totalCost +=  c;
 				stationJ = data.get(j);
-				
+				moves[0]++;
 			}
 			else{
 				//this means we can drive straight to breakpoint k
@@ -167,6 +168,7 @@ public class CheapestGas {
 				double c = stationJ.cost * diff;
 //				System.out.println("drove from "+stationJ.index+", a distance of "+df.format(diff)+", to "+upNext.index+"; cost "+df.format(stationJ.cost)+"*"+df.format(diff)+'='+df.format(stationJ.cost*diff));
 				totalCost += c;
+				moves[0]++;
 			}
 		}
 		jk[0] = j;
