@@ -2,6 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Collections;
@@ -28,21 +29,20 @@ public class CheapestGas {
 	
 	
 	public static void main(String args[]) throws IOException{
-		int n = Integer.parseInt(args[0].trim());
-		//int[] Ns = {25000000,27500000,300000000,325000000};//,
-				//12500000,15000000,20000000}; //number of stations
-		//int numberOfIterations = 5; //in order to lower variance, we will run each n multiple times and take the mean
-		int U = 100; //size of the tank -- can vary
 		
-		FileWriter writer = new FileWriter("output.csv");
+		int[] Ns = {12000000,13000000,14000000,15000000,16000000,17000000,18000000};//,
+				//12500000,15000000,20000000}; //number of stations
+		int numberOfIterations = 5; //in order to lower variance, we will run each n multiple times and take the mean
+		int U = 5000; //size of the tank -- can vary
+		
 		for (int n : Ns){
 			double totalTime = 0;
+			double[] times = new double[numberOfIterations];
 			for (int numIt = 0; numIt < numberOfIterations; numIt++){
 				ArrayList<Station> data = getData(n);
-	//			System.out.println(data);
+		//			System.out.println(data);
 				
-				//initialize the time
-				double t1 = System.currentTimeMillis();
+				
 				
 				//initialize our objects to slide a window of 'distance' U (tank size) over the nodes
 				PriorityQueue<Station> window = new PriorityQueue<Station>(); //priority queue lets us check min(cost) in log(n) time
@@ -57,7 +57,10 @@ public class CheapestGas {
 					prev.add(blankStation); 
 					next.add(blankStation);
 				}
-	
+				
+				//initialize the time
+				double t1 = System.currentTimeMillis();
+				
 				//iterate over the stations to calculate 'next' and 'prev' cheapest stations ONCE (dynamic programming)
 				for (Station s : data){
 					//check if we need to remove from past station from the queue 
@@ -68,13 +71,13 @@ public class CheapestGas {
 							//the minimum cost right after we remove station i is next(i) 
 							//because when it is the earliest station left in the queue, every other station in the queue is 
 							//1) within driving distance U and 2) after it
-	//						System.out.println("before adding station "+s.index+" we remove " +prevS.index);
+		//						System.out.println("before adding station "+s.index+" we remove " +prevS.index);
 							underConsideration.remove(0);
 							window.remove(prevS);
 							Station nextStation = Collections.min(underConsideration,new StationComparator());
 							//store the minimum 'next' station in next[station_to_remove.index]
 							next.set(prevS.index, nextStation);
-	
+		
 						}
 						else{
 							break;
@@ -94,16 +97,16 @@ public class CheapestGas {
 				//so here we have to process remaining elements of the queue
 				while(true && underConsideration.size() > 0){
 					Station s2 = underConsideration.get(0);
-	//				System.out.println("before we finish, remove "+s2.index);
+		//				System.out.println("before we finish, remove "+s2.index);
 					Station nextStation = Collections.min(underConsideration,new StationComparator());
 					next.set(s2.index, nextStation);
 					underConsideration.remove(0);
 					window.remove(s2);
 				}
-	//			System.out.println("Array of Cheapest Gas Station Previous to Station i Within Distance U");
-	//			System.out.println(prev);
-	//			System.out.println("Array of Cheapest Gas Station After Station i Within Distance U");
-	//			System.out.println(next);
+		//			System.out.println("Array of Cheapest Gas Station Previous to Station i Within Distance U");
+		//			System.out.println(prev);
+		//			System.out.println("Array of Cheapest Gas Station After Station i Within Distance U");
+		//			System.out.println(next);
 				
 				
 				//now we need to check which stations are "breakpoints" - where prev[i] == i
@@ -115,7 +118,7 @@ public class CheapestGas {
 					}
 					i++;
 				}
-	//			System.out.println(breakPoints);
+		//			System.out.println(breakPoints);
 				
 				//now we can 'paste together' solutions from breakpoint to breakpoint to attain the global optimum
 				breakPoints.add(n-1);
@@ -126,24 +129,30 @@ public class CheapestGas {
 				int[] moves = {0};
 				while (jk[1] < n-1){
 					jk[1] = breakPoints.get(counter);
-	//				System.out.println(jk[0]+" "+jk[1]);
+		//				System.out.println(jk[0]+" "+jk[1]);
 					totalCost = driveToNext(jk,data,next,totalCost,U,moves);
 					counter++;
 				}
-	//			System.out.println(totalCost);
+		//			System.out.println(totalCost);
 				double time = System.currentTimeMillis() - t1;
-				System.out.println(String.valueOf(n)+','+n*Math.log(n)+','+time+"; "+moves[0]);
-				totalTime += time;
+				//System.out.println(String.valueOf(n)+','+n*Math.log(n)+','+time);
+				//System.out.println(time);
+				totalTime+=time;
+				times[numIt] = time;
 			}
-		writer.write(String.valueOf(n)+','+(totalTime/numberOfIterations)+','+n*Math.log(n)+'\n');
+		Arrays.sort(times);
+		double med = times[(int)(numberOfIterations/2)];
+		double min = times[0];
+		double max = times[numberOfIterations-1];
+		System.out.println(String.valueOf(n)+','+n*Math.log(n)+','+med+","+min+","+max);
+		
 		}
-	writer.close();
-	}
+	}			
+
 
 
 	private static double driveToNext(int[] jk, ArrayList<Station> data, ArrayList<Station> next, double totalCost, int U,int[] moves) {
 		//this implements the locally optimal solution that, when used only from point i to a breakpoint k, achieves global optimization
-		DecimalFormat df = new DecimalFormat("#.000"); 
 		int j = jk[0];
 		int k = jk[1];
 		Station stationJ = data.get(j);
