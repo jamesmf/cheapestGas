@@ -17,7 +17,7 @@ public class CheapestGas {
 		double distanceFromZero = 0;
 		Random r = new Random();
 		for (int i=0; i<n; i++){
-			double distance = r.nextGaussian()*3+30;
+			double distance = r.nextGaussian()*30+300;
 			double cost = r.nextGaussian()*0.5+3;
 			int index = i;
 			Station station = new Station(index,distance,cost,distanceFromZero);
@@ -30,10 +30,10 @@ public class CheapestGas {
 	
 	public static void main(String args[]) throws IOException{
 		
-		int[] Ns = {12000000,13000000,14000000,15000000,16000000,17000000,18000000};//,
+		int[] Ns = {100000,400000,1600000,3200000,6400000,12000000};//,
 				//12500000,15000000,20000000}; //number of stations
 		int numberOfIterations = 5; //in order to lower variance, we will run each n multiple times and take the mean
-		int U = 5000; //size of the tank -- can vary
+		int U = 50000; //size of the tank -- can vary
 		
 		for (int n : Ns){
 			double totalTime = 0;
